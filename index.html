@@ -1,1 +1,201 @@
-# Special-OT-scheme
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>November OT Calculator Hub</title>
+  <!-- Tailwind CSS & Confetti Library -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    html, body {
+      font-family: 'Inter', sans-serif;
+      overscroll-behavior: none;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Floating Rupee Background Animation */
+    .rupee-bg {
+      position: absolute;
+      color: rgba(56, 189, 248, 0.08);
+      font-weight: 800;
+      user-select: none;
+      pointer-events: none;
+      animation: floatRupee linear infinite alternate;
+    }
+
+    @keyframes floatRupee {
+      0% { transform: translateY(0px) rotate(0deg) scale(1); }
+      50% { transform: translateY(-20px) rotate(8deg) scale(1.04); }
+      100% { transform: translateY(-40px) rotate(-8deg) scale(1.08); }
+    }
+
+    /* Slow Duck Walking Across Screen */
+    @keyframes slowWalkAcross {
+      0% {
+        transform: translate(-100px, -20px) scale(0.75);
+        opacity: 0;
+      }
+      10% { opacity: 0.85; }
+      85% { opacity: 0.85; }
+      100% {
+        transform: translate(calc(100vw + 100px), 18vh) scale(1.05);
+        opacity: 0;
+      }
+    }
+
+    /* Duck Hopping & Waddling */
+    @keyframes duckWaddleHop {
+      0% { transform: translateY(0px) rotate(-10deg); }
+      25% { transform: translateY(-16px) rotate(0deg) scaleY(1.05); }
+      50% { transform: translateY(2px) rotate(10deg); }
+      75% { transform: translateY(-16px) rotate(0deg) scaleY(1.05); }
+      100% { transform: translateY(0px) rotate(-10deg); }
+    }
+
+    .duck-fly-overlay {
+      position: fixed;
+      top: 15%;
+      left: 0;
+      z-index: 50;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0;
+    }
+
+    .duck-fly-active {
+      animation: slowWalkAcross 11s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    .duck-body {
+      animation: duckWaddleHop 0.9s ease-in-out infinite;
+      filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.4));
+    }
+
+    /* Dynamic Result Animations */
+    .smile-bounce {
+      display: inline-block;
+      animation: bounce 0.8s infinite alternate ease-in-out;
+    }
+    .smile-spin {
+      display: inline-block;
+      animation: spinPulse 1.2s infinite ease-in-out;
+    }
+
+    @keyframes bounce {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-8px); }
+    }
+
+    @keyframes spinPulse {
+      0% { transform: scale(0.8) rotate(-10deg); }
+      50% { transform: scale(1.2) rotate(10deg); }
+      100% { transform: scale(0.8) rotate(-10deg); }
+    }
+
+    .pop-anim {
+      animation: popEffect 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .blink-anim {
+      animation: blinkEffect 1s infinite alternate;
+    }
+
+    @keyframes popEffect {
+      0% { transform: scale(0.97); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes blinkEffect {
+      0% { color: #38bdf8; text-shadow: 0 0 8px rgba(56, 189, 248, 0.4); }
+      100% { color: #4ade80; text-shadow: 0 0 20px rgba(74, 222, 128, 0.8); }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 h-screen w-screen overflow-hidden flex items-center justify-center p-3 sm:p-5 select-none relative">
+
+  <!-- Floating Background Rupee Signs -->
+  <div id="rupeeBgContainer" class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+    <div class="rupee-bg text-6xl sm:text-8xl" style="top: 6%; left: 4%; animation-duration: 8s;">₹</div>
+    <div class="rupee-bg text-7xl sm:text-9xl" style="top: 12%; right: 6%; animation-duration: 10s; animation-delay: -2s;">₹</div>
+    <div class="rupee-bg text-8xl sm:text-[11rem]" style="bottom: 8%; left: 6%; animation-duration: 9s; animation-delay: -4s;">₹</div>
+    <div class="rupee-bg text-6xl sm:text-8xl" style="bottom: 10%; right: 10%; animation-duration: 11s; animation-delay: -1s;">₹</div>
+    <div class="rupee-bg text-5xl sm:text-7xl" style="top: 42%; left: 2%; animation-duration: 7s; animation-delay: -3s;">₹</div>
+    <div class="rupee-bg text-5xl sm:text-7xl" style="top: 45%; right: 3%; animation-duration: 12s; animation-delay: -5s;">₹</div>
+  </div>
+
+  <!-- Zero Payout Duck Overlay -->
+  <div id="zeroDuckContainer" class="duck-fly-overlay hidden">
+    <div class="relative flex flex-col items-center opacity-80 hover:opacity-100 transition-opacity">
+      <div class="bg-amber-400 text-slate-950 text-xs sm:text-sm font-black px-3.5 py-1.5 rounded-2xl rounded-bl-none shadow-xl mb-1 whitespace-nowrap border-2 border-amber-300">
+        ₹0 Overtime? Quack! 🦆
+      </div>
+      <svg class="duck-body w-28 h-28 sm:w-36 sm:h-36 opacity-85" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="50" cy="60" rx="32" ry="24" fill="#FACC15"/>
+        <path d="M 20 58 Q 10 50 14 42 Q 24 50 26 56 Z" fill="#EAB308"/>
+        <path d="M 40 55 C 32 55 28 68 42 72 C 55 75 58 60 40 55 Z" fill="#CA8A04"/>
+        <circle cx="70" cy="36" r="18" fill="#FACC15"/>
+        <path d="M 82 34 Q 98 36 86 44 Z" fill="#F97316"/>
+        <circle cx="74" cy="32" r="3.5" fill="#0F172A"/>
+        <circle cx="75.5" cy="30.5" r="1.2" fill="#FFFFFF"/>
+        <circle cx="72" cy="40" r="4" fill="#F43F5E" opacity="0.6"/>
+        <path d="M 45 80 L 42 90 M 42 90 L 36 92 M 42 90 L 48 92" stroke="#F97316" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 58 80 L 62 90 M 62 90 L 56 92 M 62 90 L 68 92" stroke="#EA580C" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Main App Box -->
+  <div class="relative z-10 bg-slate-900/95 backdrop-blur-md border-2 border-sky-400/80 rounded-2xl p-4 sm:p-5 w-full max-w-2xl md:max-w-3xl flex flex-col justify-between shadow-[0_0_50px_rgba(56,189,248,0.25)]">
+    
+    <!-- Tab Selection -->
+    <div class="grid grid-cols-2 gap-2.5 mb-3">
+      <button id="btnTabNov1" onclick="switchTab('nov1')" class="py-2.5 px-4 rounded-xl font-extrabold text-xs sm:text-base transition-all duration-300 bg-sky-400 text-slate-950 shadow-lg shadow-sky-400/30">
+        1st Nov OT
+      </button>
+      <button id="btnTabNov2to15" onclick="switchTab('nov2to15')" class="py-2.5 px-4 rounded-xl font-extrabold text-xs sm:text-base transition-all duration-300 bg-slate-950/80 text-slate-400 border border-slate-700 hover:text-slate-200">
+        2nd - 15th Nov OT
+      </button>
+    </div>
+
+    <!-- TAB 1: 1st NOVEMBER OT -->
+    <div id="tabNov1" class="flex flex-col space-y-3">
+      <div class="text-center">
+        <h1 class="text-sky-400 font-extrabold text-base sm:text-2xl tracking-wider uppercase">1st November OT Scheme</h1>
+        <p class="text-slate-300 text-[11px] sm:text-xs font-semibold mt-0.5">₹100 / CHAT ABOVE 45 (WORKDAY) OR FROM 1st CHAT (WEEK OFF)</p>
+      </div>
+
+      <!-- Volume Inputs -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Calls / Chats</label>
+          <input type="number" id="n1_callCount" placeholder="0" min="0" oninput="updateTotal('n1')"
+            class="w-full bg-slate-950 border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-xs sm:text-sm text-white outline-none transition">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Emails (3 emails = 2 chats)</label>
+          <input type="number" id="n1_emailCount" placeholder="0" min="0" oninput="updateTotal('n1')"
+            class="w-full bg-slate-950 border border-slate-700 focus:border-sky-400 rounded-xl px-3 py-2 text-xs sm:text-sm text-white outline-none transition">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Total Equivalent (Auto)</label>
+          <input type="number" id="n1_total" placeholder="0.00" readonly
+            class="w-full bg-slate-950/80 border border-sky-500/50 rounded-xl px-3 py-2 text-xs sm:text-sm text-sky-400 font-bold outline-none">
+        </div>
+      </div>
+
+      <!-- Shift Type Choice -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <label class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 flex items-center gap-3 cursor-pointer hover:border-sky-500/50 transition">
