@@ -1,883 +1,279 @@
-```html
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Overtime (OT) Scheme Calculator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        slate: {
-                            850: '#172033',
-                            900: '#0f172a',
-                            950: '#090d16',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body {
-            background-color: #090d16;
-            color: #f8fafc;
-            -webkit-tap-highlight-color: transparent;
-        }
-        /* Hide number input arrows for cleaner mobile & desktop UI */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
-        .glass-card {
-            background: rgba(30, 41, 59, 0.72);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(148, 163, 184, 0.14);
-        }
-        .summary-glow {
-            box-shadow: 0 20px 50px -12px rgba(16, 185, 129, 0.14);
-        }
-    </style>
-</head>
-<body class="min-h-screen font-sans antialiased selection:bg-emerald-500/30 selection:text-emerald-200 pb-12">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overtime (OT) Scheme Calculator</title>
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #131a2a;
+      --bg-card: #192236;
+      --bg-input: #0e1422;
+      --border-color: #283552;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-blue: #3b82f6;
+      --accent-blue-hover: #2563eb;
+      --accent-emerald: #10b981;
+      --accent-emerald-bg: rgba(16, 185, 129, 0.12);
+      --accent-amber: #f59e0b;
+      --accent-amber-bg: rgba(245, 158, 11, 0.12);
+      --accent-red: #ef4444;
+      --accent-red-bg: rgba(239, 68, 68, 0.12);
+      --accent-purple: #8b5cf6;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 16px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #0f2952 0%, #163b73 100%);
+      border: 1px solid #234d8c;
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      margin-bottom: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .header-title h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+
+    .header-title p {
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      margin-top: 2px;
+    }
+
+    .duration-badge {
+      background: rgba(251, 191, 36, 0.15);
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      color: #fde68a;
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-reset {
+      background: rgba(255, 255, 255, 0.1);
+      color: #f8fafc;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-reset:hover {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+
+    /* Main Grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 0.95fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 880px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+      body {
+        padding: 12px;
+      }
+      .header {
+        padding: 16px;
+      }
+      .header-title h1 {
+        font-size: 1.25rem;
+      }
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-title {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .pill-pass {
+      background: var(--accent-emerald-bg);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .pill-fail {
+      background: var(--accent-red-bg);
+      color: var(--accent-red);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    .pill-info {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+    }
+
+    /* Form Controls */
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 520px) {
+      .form-grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .form-group label span.req {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    input[type="number"],
+    select {
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 11px 14px;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-weight: 600;
+      width: 100%;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    input[type="number"]:focus,
+    select:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    /* Rider Banner */
+    .rider-status {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.84rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.4;
+    }
+
+    .rider-status.pass {
+      background: var(--accent-emerald-bg);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #a7f3d0;
+    }
+
+    .rider-status.fail {
+      background: var(--accent-red-bg);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #fecaca;
+    }
+
+    /* Segmented Toggle */
+    .segmented-control {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: var(--bg-input);
+      padding: 4px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      margin-bottom: 16px;
+    }
 
-    <!-- Top Header Banner -->
-    <header class="bg-gradient-to-r from-slate-900 via-[#0c2749] to-slate-900 border-b border-slate-800/80 sticky top-0 z-30 backdrop-blur-md">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white">Overtime (OT) Scheme Calculator</h1>
-                    <p class="text-xs text-slate-300 flex flex-wrap items-center gap-x-2 gap-y-1 mt-0.5">
-                        <span class="inline-flex items-center gap-1 text-amber-300 font-medium">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            16th Nov – 29th Nov (2 Weeks)
-                        </span>
-                        <span class="text-slate-600">•</span>
-                        <span class="text-slate-300">Total 4 WOs (No 7 days working)</span>
-                    </p>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-2 self-start sm:self-auto">
-                <button id="btnReset" type="button" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 text-xs font-semibold border border-slate-700 transition flex items-center gap-1.5">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    Reset
-                </button>
-                <button id="btnCopyTop" type="button" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-semibold shadow-lg shadow-emerald-950/50 transition flex items-center gap-1.5">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-                    Copy Summary
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-5 right-5 left-5 sm:left-auto z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
-        <div class="bg-slate-800 border border-emerald-500/40 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 text-sm font-medium">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span id="toastMsg">Payout summary copied to clipboard!</span>
-        </div>
-    </div>
-
-    <!-- Main Container -->
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-6">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-            <!-- LEFT COLUMN: Interactive Inputs (7 cols on desktop) -->
-            <div class="lg:col-span-7 space-y-6">
-
-                <!-- Section 1: Quality & Compliance Riders -->
-                <section class="glass-card rounded-2xl p-5 sm:p-6">
-                    <div class="flex items-center justify-between gap-2 mb-4">
-                        <div>
-                            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Step 1 • Mandatory Gate</span>
-                            <h2 class="text-base sm:text-lg font-bold text-white mt-0.5">Scheme Rider Qualification</h2>
-                        </div>
-                        <span id="overallRiderBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                            Riders Qualified
-                        </span>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <!-- CSAT Input -->
-                        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <label for="csatInput" class="text-xs font-semibold text-slate-300">Scheme Period CSAT (%)</label>
-                                <span id="csatBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400">
-                                    ✓ ≥ 65%
-                                </span>
-                            </div>
-                            <div class="relative flex items-center">
-                                <input id="csatInput" type="number" inputmode="decimal" min="0" max="100" step="0.1" value="72"
-                                    class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl px-3.5 py-3 text-lg font-bold text-white outline-none transition">
-                                <span class="absolute right-3.5 text-slate-400 font-semibold text-sm">%</span>
-                            </div>
-                            <p class="text-[11px] text-slate-400 mt-2">Target: Minimum <strong class="text-slate-200">65%</strong> CSAT during 16–29 Nov.</p>
-                        </div>
-
-                        <!-- Unsaved Errors Input -->
-                        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <label for="errorsInput" class="text-xs font-semibold text-slate-300">Unsaved Errors Count</label>
-                                <span id="errorsBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400">
-                                    ✓ ≤ 1 Error
-                                </span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button type="button" id="btnErrMinus" aria-label="Decrease Errors"
-                                    class="w-12 h-12 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-700 flex items-center justify-center text-lg font-bold text-slate-200 transition">−</button>
-                                <input id="errorsInput" type="number" inputmode="numeric" min="0" max="99" value="0"
-                                    class="w-full text-center bg-slate-950 border border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-xl py-3 text-lg font-bold text-white outline-none transition">
-                                <button type="button" id="btnErrPlus" aria-label="Increase Errors"
-                                    class="w-12 h-12 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-700 flex items-center justify-center text-lg font-bold text-slate-200 transition">+</button>
-                            </div>
-                            <p class="text-[11px] text-slate-400 mt-2">Max allowed: <strong class="text-slate-200">1</strong> unsaved error in scheme period.</p>
-                        </div>
-                    </div>
-
-                    <!-- Rider Warning Alert (Hidden when passed) -->
-                    <div id="riderWarningBox" class="hidden mt-4 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
-                        <svg class="w-5 h-5 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
-                        <div class="text-xs text-amber-200 leading-relaxed">
-                            <strong class="font-semibold text-amber-300">Fallback Rate Active (₹75 / transaction):</strong> Because CSAT is below 65% or Unsaved Errors exceed 1, all eligible OT transactions (both 6th Day & Regular Day) will be paid flat at <strong>₹75/tx</strong> with <strong>no bonus</strong>.
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Section 2: 6th Day OT Plan -->
-                <section class="glass-card rounded-2xl p-5 sm:p-6">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                        <div>
-                            <span class="text-[11px] font-bold uppercase tracking-wider text-sky-400">Step 2 • Week-Off Working</span>
-                            <h2 class="text-base sm:text-lg font-bold text-white mt-0.5">6th Day OT Plan</h2>
-                        </div>
-
-                        <!-- Segmented Control: 0, 1, 2 Days -->
-                        <div class="grid grid-cols-3 bg-slate-950 p-1 rounded-xl border border-slate-800 w-full sm:w-auto">
-                            <button type="button" data-otdays="0" class="ot-day-btn px-3.5 py-2 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white">0 Days</button>
-                            <button type="button" data-otdays="1" class="ot-day-btn px-3.5 py-2 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white">1 Day</button>
-                            <button type="button" data-otdays="2" class="ot-day-btn px-3.5 py-2 rounded-lg text-xs font-semibold transition bg-sky-600 text-white shadow">2 Days</button>
-                        </div>
-                    </div>
-
-                    <!-- Dynamic 6th Day Inputs -->
-                    <div id="sixthDayEmptyState" class="hidden py-6 text-center bg-slate-900/60 rounded-xl border border-dashed border-slate-800">
-                        <p class="text-sm text-slate-400">No 6th Day OT selected. Select <strong class="text-slate-200">1 Day</strong> or <strong class="text-slate-200">2 Days</strong> above to calculate 6th day payouts & bonuses.</p>
-                    </div>
-
-                    <div id="sixthDayInputsContainer" class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- 6th Day 1 -->
-                            <div id="day1Card" class="bg-slate-900/80 border border-slate-800 rounded-xl p-4">
-                                <div class="flex items-center justify-between mb-2">
-                                    <label for="otDay1Tx" class="text-xs font-semibold text-slate-300">6th Day 1 Transactions</label>
-                                    <span id="day1MinBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400">
-                                        ✓ Min 35 Met
-                                    </span>
-                                </div>
-                                <input id="otDay1Tx" type="number" inputmode="numeric" min="0" value="48"
-                                    class="w-full bg-slate-950 border border-slate-700 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 rounded-xl px-3.5 py-3 text-lg font-bold text-white outline-none transition">
-                                <div class="flex justify-between items-center mt-2 text-[11px] text-slate-400">
-                                    <span>Min threshold: 35 tx</span>
-                                    <span id="day1ExtraHint" class="text-sky-400 font-medium">+13 above min</span>
-                                </div>
-                            </div>
-
-                            <!-- 6th Day 2 -->
-                            <div id="day2Card" class="bg-slate-900/80 border border-slate-800 rounded-xl p-4">
-                                <div class="flex items-center justify-between mb-2">
-                                    <label for="otDay2Tx" class="text-xs font-semibold text-slate-300">6th Day 2 Transactions</label>
-                                    <span id="day2MinBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400">
-                                        ✓ Min 35 Met
-                                    </span>
-                                </div>
-                                <input id="otDay2Tx" type="number" inputmode="numeric" min="0" value="54"
-                                    class="w-full bg-slate-950 border border-slate-700 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 rounded-xl px-3.5 py-3 text-lg font-bold text-white outline-none transition">
-                                <div class="flex justify-between items-center mt-2 text-[11px] text-slate-400">
-                                    <span>Min threshold: 35 tx</span>
-                                    <span id="day2ExtraHint" class="text-sky-400 font-medium">+19 above min</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Progress Bar toward Next Bonus Tier -->
-                        <div id="tierProgressCard" class="bg-slate-900/90 border border-slate-800 rounded-xl p-4">
-                            <div class="flex flex-wrap items-center justify-between gap-2 text-xs mb-2">
-                                <span class="font-semibold text-slate-200" id="tierProgressTitle">6th Day Bonus Tier Status</span>
-                                <span class="font-bold text-emerald-400" id="tierProgressCount">102 / 100 Tx</span>
-                            </div>
-                            <div class="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
-                                <div id="tierProgressBar" class="h-full bg-gradient-to-r from-sky-500 to-emerald-400 rounded-full transition-all duration-300" style="width: 100%"></div>
-                            </div>
-                            <p id="tierProgressMessage" class="text-xs text-slate-300 mt-2.5 leading-relaxed">
-                                🎉 <strong class="text-emerald-300">Max ₹8,000 Bonus Unlocked!</strong> (100+ combined transactions across 2 OT days).
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Section 3: Regular Day OT Scheme -->
-                <section class="glass-card rounded-2xl p-5 sm:p-6">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                        <div>
-                            <span class="text-[11px] font-bold uppercase tracking-wider text-purple-400">Step 3 • Regular Shifts</span>
-                            <h2 class="text-base sm:text-lg font-bold text-white mt-0.5">Regular Day OT (&gt;45 Tx/Day)</h2>
-                        </div>
-
-                        <!-- Toggle Direct Total vs Day-by-Day Helper -->
-                        <div class="inline-flex bg-slate-950 p-1 rounded-xl border border-slate-800 self-start sm:self-auto">
-                            <button type="button" id="modeDirectBtn" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 text-white transition">Direct Total</button>
-                            <button type="button" id="modeDailyBtn" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">Day-by-Day</button>
-                        </div>
-                    </div>
-
-                    <!-- Mode A: Direct Total Extra Transactions -->
-                    <div id="regularDirectContainer" class="bg-slate-900/80 border border-slate-800 rounded-xl p-4">
-                        <div class="flex items-center justify-between mb-2">
-                            <label for="regularDirectExtraInput" class="text-xs font-semibold text-slate-300">Total Extra Transactions Above 45/Day</label>
-                            <span id="regularRateBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-300">
-                                Rate: ₹100 / tx
-                            </span>
-                        </div>
-                        <input id="regularDirectExtraInput" type="number" inputmode="numeric" min="0" value="18"
-                            class="w-full bg-slate-950 border border-slate-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 rounded-xl px-3.5 py-3 text-lg font-bold text-white outline-none transition">
-                        <p class="text-[11px] text-slate-400 mt-2">
-                            Sum of <code class="text-slate-300">(Daily Transactions − 45)</code> across all regular working days where daily transactions exceeded 45.
-                        </p>
-                    </div>
-
-                    <!-- Mode B: Day-by-Day Helper (Up to 10 regular days in 2 weeks) -->
-                    <div id="regularDailyContainer" class="hidden space-y-3">
-                        <div class="flex items-center justify-between text-xs text-slate-400 px-1">
-                            <span>Enter total transactions per regular day (only &gt;45 counts):</span>
-                            <span class="font-semibold text-purple-300">Eligible Extra: <strong id="dailyComputedExtraTotal">0</strong> tx</span>
-                        </div>
-                        <div id="regularDaysGrid" class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-                            <!-- 10 regular day inputs injected by JS -->
-                        </div>
-                    </div>
-                </section>
-
-            </div>
-
-            <!-- RIGHT COLUMN: Sticky Live Payout Summary (5 cols on desktop) -->
-            <div class="lg:col-span-5 lg:sticky lg:top-24 space-y-5">
-
-                <section class="bg-gradient-to-b from-slate-800/95 to-slate-900/95 border border-slate-700/80 rounded-2xl p-5 sm:p-6 summary-glow">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-                        <div>
-                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Estimated Total Payout</span>
-                            <div id="grandTotalDisplay" class="text-3xl sm:text-4xl font-extrabold text-emerald-400 tracking-tight mt-1">
-                                ₹13,500.00
-                            </div>
-                        </div>
-                        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400 font-bold text-xl">
-                            ₹
-                        </div>
-                    </div>
-
-                    <!-- Itemized Breakdown -->
-                    <div class="py-4 space-y-3.5 text-sm">
-                        <!-- 1. 6th Day Base -->
-                        <div class="flex items-start justify-between gap-3">
-                            <div>
-                                <div class="font-medium text-slate-200">6th Day Base OT</div>
-                                <div id="breakdownBaseSub" class="text-xs text-slate-400">2 OT days qualified (Min 35/day met)</div>
-                            </div>
-                            <div id="breakdownBaseAmt" class="font-bold text-white whitespace-nowrap">₹3,500.00</div>
-                        </div>
-
-                        <!-- 2. 6th Day Bonus -->
-                        <div class="flex items-start justify-between gap-3">
-                            <div>
-                                <div class="font-medium text-slate-200">6th Day Milestone Bonus</div>
-                                <div id="breakdownBonusSub" class="text-xs text-emerald-400">2 Days ≥ 100 total tx tier</div>
-                            </div>
-                            <div id="breakdownBonusAmt" class="font-bold text-emerald-400 whitespace-nowrap">₹8,000.00</div>
-                        </div>
-
-                        <!-- 3. 6th Day Extra Transactions -->
-                        <div class="flex items-start justify-between gap-3">
-                            <div>
-                                <div class="font-medium text-slate-200">6th Day Extra Tx Payout</div>
-                                <div id="breakdownSixthExtraSub" class="text-xs text-slate-400">2 tx above 100 threshold × ₹100</div>
-                            </div>
-                            <div id="breakdownSixthExtraAmt" class="font-bold text-white whitespace-nowrap">₹200.00</div>
-                        </div>
-
-                        <div class="border-t border-slate-800/90 my-1"></div>
-
-                        <!-- 4. Regular Day OT -->
-                        <div class="flex items-start justify-between gap-3">
-                            <div>
-                                <div class="font-medium text-slate-200">Regular Day OT (&gt;45/day)</div>
-                                <div id="breakdownRegSub" class="text-xs text-slate-400">18 extra tx × ₹100</div>
-                            </div>
-                            <div id="breakdownRegAmt" class="font-bold text-white whitespace-nowrap">₹1,800.00</div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Stat Pills -->
-                    <div class="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-800 text-xs">
-                        <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3">
-                            <span class="text-slate-400 block">6th Day Total Tx</span>
-                            <span id="statSixthTotalTx" class="text-base font-bold text-white mt-0.5 block">102 tx</span>
-                        </div>
-                        <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-3">
-                            <span class="text-slate-400 block">Effective OT Rate</span>
-                            <span id="statEffectiveRate" class="text-base font-bold text-sky-400 mt-0.5 block">₹100 / tx</span>
-                        </div>
-                    </div>
-
-                    <!-- Action Button -->
-                    <button id="btnCopyMain" type="button" class="mt-5 w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-bold text-sm shadow-lg shadow-emerald-950/60 transition flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-                        Copy Payout Breakdown
-                    </button>
-                </section>
-
-                <!-- Collapsible Scheme Reference Accordion -->
-                <div class="glass-card rounded-2xl overflow-hidden">
-                    <button id="accordionToggle" type="button" class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-800/40 transition">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                            <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            View Scheme Rules Reference
-                        </span>
-                        <svg id="accordionChevron" class="w-4 h-4 text-slate-400 transform transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </button>
-
-                    <div id="accordionContent" class="hidden px-5 pb-5 border-t border-slate-800/80 text-xs text-slate-300 space-y-3 pt-4">
-                        <div class="overflow-x-auto rounded-xl border border-slate-800">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-slate-900 text-slate-300 border-b border-slate-800">
-                                        <th class="p-2.5 font-semibold">6th Day Plan</th>
-                                        <th class="p-2.5 font-semibold">OT Amt</th>
-                                        <th class="p-2.5 font-semibold">Bonus</th>
-                                        <th class="p-2.5 font-semibold">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-800 bg-slate-950/50">
-                                    <tr>
-                                        <td class="p-2.5">1 Day (min 35 tx)</td>
-                                        <td class="p-2.5">₹3,500</td>
-                                        <td class="p-2.5 text-slate-500">—</td>
-                                        <td class="p-2.5 font-bold text-white">₹3,500</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-2.5">2 Days (min 35 tx each)</td>
-                                        <td class="p-2.5">₹3,500</td>
-                                        <td class="p-2.5 text-emerald-400">₹4,200</td>
-                                        <td class="p-2.5 font-bold text-white">₹7,700</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-2.5">2 Days (min 100 total tx)</td>
-                                        <td class="p-2.5">₹3,500</td>
-                                        <td class="p-2.5 text-emerald-400">₹8,000</td>
-                                        <td class="p-2.5 font-bold text-white">₹11,500</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <ul class="space-y-1.5 text-[11px] text-slate-400 list-disc pl-4 leading-relaxed">
-                            <li><strong class="text-slate-200">Riders:</strong> CSAT ≥ 65%, Unsaved Errors ≤ 1, and Min 35 tx per OT day. If not achieved, flat <strong class="text-amber-300">₹75/tx</strong> applies with no bonus.</li>
-                            <li><strong class="text-slate-200">Extra 6th Day Tx:</strong> Any transactions beyond the plan threshold are paid at <strong class="text-slate-200">₹100/tx</strong> (when riders pass).</li>
-                            <li><strong class="text-slate-200">Regular Day OT:</strong> Every transaction above 45/day pays <strong class="text-slate-200">₹100/tx</strong> if CSAT & Error riders pass, else <strong class="text-amber-300">₹75/tx</strong>.</li>
-                        </ul>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </main>
-
-    <script>
-        // State object holding all user inputs and mode toggles
-        const state = {
-            csat: 72,
-            errors: 0,
-            otDays: 2, // 0, 1, or 2
-            day1Tx: 48,
-            day2Tx: 54,
-            regularMode: 'direct', // 'direct' or 'daily'
-            regularDirectExtra: 18,
-            regularDailyTx: [45, 50, 48, 42, 55, 45, 45, 45, 45, 45]
-        };
-
-        // Indian Rupee Currency Formatter
-        function formatINR(amount) {
-            return '₹' + amount.toLocaleString('en-IN', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-        }
-
-        // DOM Elements
-        const els = {
-            csatInput: document.getElementById('csatInput'),
-            errorsInput: document.getElementById('errorsInput'),
-            btnErrMinus: document.getElementById('btnErrMinus'),
-            btnErrPlus: document.getElementById('btnErrPlus'),
-            csatBadge: document.getElementById('csatBadge'),
-            errorsBadge: document.getElementById('errorsBadge'),
-            overallRiderBadge: document.getElementById('overallRiderBadge'),
-            riderWarningBox: document.getElementById('riderWarningBox'),
-
-            otDayBtns: document.querySelectorAll('.ot-day-btn'),
-            sixthDayEmptyState: document.getElementById('sixthDayEmptyState'),
-            sixthDayInputsContainer: document.getElementById('sixthDayInputsContainer'),
-            day1Card: document.getElementById('day1Card'),
-            day2Card: document.getElementById('day2Card'),
-            otDay1Tx: document.getElementById('otDay1Tx'),
-            otDay2Tx: document.getElementById('otDay2Tx'),
-            day1MinBadge: document.getElementById('day1MinBadge'),
-            day2MinBadge: document.getElementById('day2MinBadge'),
-            day1ExtraHint: document.getElementById('day1ExtraHint'),
-            day2ExtraHint: document.getElementById('day2ExtraHint'),
-
-            tierProgressTitle: document.getElementById('tierProgressTitle'),
-            tierProgressCount: document.getElementById('tierProgressCount'),
-            tierProgressBar: document.getElementById('tierProgressBar'),
-            tierProgressMessage: document.getElementById('tierProgressMessage'),
-
-            modeDirectBtn: document.getElementById('modeDirectBtn'),
-            modeDailyBtn: document.getElementById('modeDailyBtn'),
-            regularDirectContainer: document.getElementById('regularDirectContainer'),
-            regularDailyContainer: document.getElementById('regularDailyContainer'),
-            regularDirectExtraInput: document.getElementById('regularDirectExtraInput'),
-            regularDaysGrid: document.getElementById('regularDaysGrid'),
-            dailyComputedExtraTotal: document.getElementById('dailyComputedExtraTotal'),
-            regularRateBadge: document.getElementById('regularRateBadge'),
-
-            grandTotalDisplay: document.getElementById('grandTotalDisplay'),
-            breakdownBaseSub: document.getElementById('breakdownBaseSub'),
-            breakdownBaseAmt: document.getElementById('breakdownBaseAmt'),
-            breakdownBonusSub: document.getElementById('breakdownBonusSub'),
-            breakdownBonusAmt: document.getElementById('breakdownBonusAmt'),
-            breakdownSixthExtraSub: document.getElementById('breakdownSixthExtraSub'),
-            breakdownSixthExtraAmt: document.getElementById('breakdownSixthExtraAmt'),
-            breakdownRegSub: document.getElementById('breakdownRegSub'),
-            breakdownRegAmt: document.getElementById('breakdownRegAmt'),
-            statSixthTotalTx: document.getElementById('statSixthTotalTx'),
-            statEffectiveRate: document.getElementById('statEffectiveRate'),
-
-            btnReset: document.getElementById('btnReset'),
-            btnCopyTop: document.getElementById('btnCopyTop'),
-            btnCopyMain: document.getElementById('btnCopyMain'),
-            toast: document.getElementById('toast'),
-            toastMsg: document.getElementById('toastMsg'),
-            accordionToggle: document.getElementById('accordionToggle'),
-            accordionContent: document.getElementById('accordionContent'),
-            accordionChevron: document.getElementById('accordionChevron')
-        };
-
-        // Initialize 10 Day-by-Day Regular Inputs
-        function buildRegularDailyInputs() {
-            els.regularDaysGrid.innerHTML = '';
-            state.regularDailyTx.forEach((val, idx) => {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'bg-slate-900/90 border border-slate-800 rounded-xl p-2.5';
-                wrapper.innerHTML = `
-                    <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
-                        <span>Day ${idx + 1}</span>
-                        <span id="regDayExtra_${idx}" class="font-semibold text-purple-400">${val > 45 ? '+' + (val - 45) : '0'}</span>
-                    </div>
-                    <input type="number" inputmode="numeric" min="0" value="${val}" data-day-idx="${idx}"
-                        class="reg-daily-input w-full bg-slate-950 border border-slate-700 focus:border-purple-500 rounded-lg px-2.5 py-1.5 text-sm font-bold text-white outline-none transition">
-                `;
-                els.regularDaysGrid.appendChild(wrapper);
-            });
-
-            document.querySelectorAll('.reg-daily-input').forEach(input => {
-                input.addEventListener('input', (e) => {
-                    const index = parseInt(e.target.dataset.dayIdx, 10);
-                    const num = Math.max(0, parseInt(e.target.value, 10) || 0);
-                    state.regularDailyTx[index] = num;
-                    const extra = Math.max(0, num - 45);
-                    const badge = document.getElementById(`regDayExtra_${index}`);
-                    badge.textContent = extra > 0 ? `+${extra}` : '0';
-                    badge.className = extra > 0 ? 'font-semibold text-emerald-400' : 'font-semibold text-slate-500';
-                    calculateAndRender();
-                });
-            });
-        }
-
-        // Core Calculation & UI Update Engine
-        function calculateAndRender() {
-            // 1. Validate Global Quality & Compliance Riders
-            const csatPass = state.csat >= 65;
-            const errorsPass = state.errors <= 1;
-            const globalRidersPass = csatPass && errorsPass;
-
-            // Update Rider Badges
-            els.csatBadge.textContent = csatPass ? '✓ ≥ 65%' : '✕ < 65%';
-            els.csatBadge.className = csatPass
-                ? 'text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400'
-                : 'text-[11px] font-semibold px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-400';
-
-            els.errorsBadge.textContent = errorsPass ? '✓ ≤ 1 Error' : '✕ > 1 Error';
-            els.errorsBadge.className = errorsPass
-                ? 'text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400'
-                : 'text-[11px] font-semibold px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-400';
-
-            els.overallRiderBadge.textContent = globalRidersPass ? 'Riders Qualified' : 'Fallback ₹75/tx Active';
-            els.overallRiderBadge.className = globalRidersPass
-                ? 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
-                : 'px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30';
-
-            els.riderWarningBox.classList.toggle('hidden', globalRidersPass);
-
-            // 2. 6th Day OT Calculations
-            let sixthBaseAmt = 0;
-            let sixthBonusAmt = 0;
-            let sixthExtraAmt = 0;
-            let sixthTotalTx = 0;
-            let baseSubText = 'No 6th day OT worked';
-            let bonusSubText = 'Not applicable';
-            let sixthExtraSubText = '0 extra transactions';
-
-            if (state.otDays === 0) {
-                els.sixthDayEmptyState.classList.remove('hidden');
-                els.sixthDayInputsContainer.classList.add('hidden');
-            } else {
-                els.sixthDayEmptyState.classList.add('hidden');
-                els.sixthDayInputsContainer.classList.remove('hidden');
-
-                const d1 = Math.max(0, state.day1Tx);
-                const d2 = state.otDays === 2 ? Math.max(0, state.day2Tx) : 0;
-                sixthTotalTx = d1 + d2;
-
-                // Update Day 1 Card Badges
-                const d1Pass = d1 >= 35;
-                els.day1MinBadge.textContent = d1Pass ? '✓ Min 35 Met' : `Need ${35 - d1} more`;
-                els.day1MinBadge.className = d1Pass
-                    ? 'text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400'
-                    : 'text-[11px] font-semibold px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-400';
-                els.day1ExtraHint.textContent = d1 > 35 ? `+${d1 - 35} above min` : '0 above min';
-
-                if (state.otDays === 1) {
-                    els.day2Card.classList.add('hidden');
-                    const allRidersMet = globalRidersPass && d1Pass;
-
-                    if (allRidersMet) {
-                        sixthBaseAmt = 3500;
-                        sixthBonusAmt = 0;
-                        const extraTx = Math.max(0, d1 - 35);
-                        sixthExtraAmt = extraTx * 100;
-
-                        baseSubText = '1 OT day qualified (≥ 35 tx)';
-                        bonusSubText = 'Bonus starts on 2nd OT day';
-                        sixthExtraSubText = `${extraTx} tx above 35 × ₹100`;
-                    } else {
-                        // Fallback ₹75/tx across all 6th-day transactions
-                        sixthBaseAmt = 0;
-                        sixthBonusAmt = 0;
-                        sixthExtraAmt = d1 * 75;
-
-                        baseSubText = !globalRidersPass ? 'Quality rider not met (Fallback)' : 'Min 35 tx/day not met (Fallback)';
-                        bonusSubText = 'No bonus in fallback mode';
-                        sixthExtraSubText = `${d1} total tx × ₹75 fallback rate`;
-                    }
-
-                    // Progress indicator for 1 Day
-                    const pct = Math.min(100, Math.round((d1 / 35) * 100));
-                    els.tierProgressTitle.textContent = '1-Day OT Qualification Progress';
-                    els.tierProgressCount.textContent = `${d1} / 35 Tx`;
-                    els.tierProgressBar.style.width = `${pct}%`;
-                    if (!globalRidersPass) {
-                        els.tierProgressMessage.innerHTML = `⚠️ <strong class="text-amber-300">Fallback Rate (₹75/tx):</strong> Fix CSAT (≥65%) or Errors (≤1) to unlock ₹3,500 base payout.`;
-                    } else if (d1 < 35) {
-                        els.tierProgressMessage.innerHTML = `Add <strong class="text-sky-300">${35 - d1} more transactions</strong> on 6th Day 1 to unlock the <strong>₹3,500.00</strong> base OT payout.`;
-                    } else {
-                        els.tierProgressMessage.innerHTML = `✅ <strong class="text-emerald-300">₹3,500 Base Unlocked!</strong> Every extra transaction above 35 earns <strong>₹100/tx</strong>.`;
-                    }
-
-                } else {
-                    // 2 OT Days selected
-                    els.day2Card.classList.remove('hidden');
-                    const d2Pass = d2 >= 35;
-                    els.day2MinBadge.textContent = d2Pass ? '✓ Min 35 Met' : `Need ${35 - d2} more`;
-                    els.day2MinBadge.className = d2Pass
-                        ? 'text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400'
-                        : 'text-[11px] font-semibold px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-400';
-                    els.day2ExtraHint.textContent = d2 > 35 ? `+${d2 - 35} above min` : '0 above min';
-
-                    const allRidersMet = globalRidersPass && d1Pass && d2Pass;
-
-                    if (allRidersMet) {
-                        sixthBaseAmt = 3500;
-                        baseSubText = '2 OT days qualified (≥ 35 tx each)';
-
-                        if (sixthTotalTx >= 100) {
-                            // Tier B: High-Volume 2-Day OR Condition (>= 100 total tx)
-                            sixthBonusAmt = 8000;
-                            const extraTx = Math.max(0, sixthTotalTx - 100);
-                            sixthExtraAmt = extraTx * 100;
-
-                            bonusSubText = 'High-Volume Tier (≥ 100 combined tx)';
-                            sixthExtraSubText = `${extraTx} tx above 100 threshold × ₹100`;
-                        } else {
-                            // Tier A: Standard 2-Day (< 100 total tx, each day >= 35 -> min combined is 70)
-                            sixthBonusAmt = 4200;
-                            const extraTx = Math.max(0, sixthTotalTx - 70);
-                            sixthExtraAmt = extraTx * 100;
-
-                            bonusSubText = 'Standard 2-Day Tier (₹4,200)';
-                            sixthExtraSubText = `${extraTx} tx above 70 (35+35) × ₹100`;
-                        }
-                    } else {
-                        // Fallback ₹75/tx across all 6th-day transactions
-                        sixthBaseAmt = 0;
-                        sixthBonusAmt = 0;
-                        sixthExtraAmt = sixthTotalTx * 75;
-
-                        baseSubText = !globalRidersPass ? 'Quality rider not met (Fallback)' : 'Min 35 tx/day not met (Fallback)';
-                        bonusSubText = 'No bonus in fallback mode';
-                        sixthExtraSubText = `${sixthTotalTx} total tx × ₹75 fallback rate`;
-                    }
-
-                    // Progress Bar toward 100-Tx ₹8,000 Bonus Tier
-                    const pct = Math.min(100, Math.round((sixthTotalTx / 100) * 100));
-                    els.tierProgressTitle.textContent = '2-Day ₹8,000 Bonus Milestone (100 Tx)';
-                    els.tierProgressCount.textContent = `${sixthTotalTx} / 100 Tx`;
-                    els.tierProgressBar.style.width = `${pct}%`;
-
-                    if (!globalRidersPass) {
-                        els.tierProgressMessage.innerHTML = `⚠️ <strong class="text-amber-300">Fallback Rate (₹75/tx):</strong> CSAT ≥65% and Errors ≤1 are required to unlock ₹7,700 / ₹11,500 slabs.`;
-                    } else if (!d1Pass || !d2Pass) {
-                        els.tierProgressMessage.innerHTML = `⚠️ <strong class="text-amber-300">Min 35 Tx/Day Required:</strong> Both OT days need at least 35 transactions to unlock base & bonus slabs.`;
-                    } else if (sixthTotalTx < 100) {
-                        const needed = 100 - sixthTotalTx;
-                        els.tierProgressMessage.innerHTML = `🚀 <strong class="text-emerald-300">₹4,200 Bonus Unlocked!</strong> Complete <strong class="text-sky-300">${needed} more tx</strong> across your 6th days to upgrade to the <strong>₹8,000 Bonus</strong>!`;
-                    } else {
-                        els.tierProgressMessage.innerHTML = `🎉 <strong class="text-emerald-300">Max ₹8,000 Bonus Unlocked!</strong> (Base ₹3,500 + Bonus ₹8,000 = ₹11,500 + ₹100/extra tx above 100).`;
-                    }
-                }
-            }
-
-            // 3. Regular Day OT Calculations (>45 tx per regular day)
-            let regularEligibleExtraTx = 0;
-            if (state.regularMode === 'direct') {
-                regularEligibleExtraTx = Math.max(0, state.regularDirectExtra);
-            } else {
-                regularEligibleExtraTx = state.regularDailyTx.reduce((sum, tx) => sum + Math.max(0, tx - 45), 0);
-                els.dailyComputedExtraTotal.textContent = regularEligibleExtraTx;
-            }
-
-            const regularRate = globalRidersPass ? 100 : 75;
-            const regularTotalAmt = regularEligibleExtraTx * regularRate;
-
-            els.regularRateBadge.textContent = `Rate: ₹${regularRate} / tx`;
-            els.regularRateBadge.className = globalRidersPass
-                ? 'text-[11px] font-semibold px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-300'
-                : 'text-[11px] font-semibold px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300';
-
-            // 4. Grand Total & Summary Card Rendering
-            const grandTotal = sixthBaseAmt + sixthBonusAmt + sixthExtraAmt + regularTotalAmt;
-
-            els.grandTotalDisplay.textContent = formatINR(grandTotal);
-            els.breakdownBaseAmt.textContent = formatINR(sixthBaseAmt);
-            els.breakdownBaseSub.textContent = baseSubText;
-
-            els.breakdownBonusAmt.textContent = formatINR(sixthBonusAmt);
-            els.breakdownBonusAmt.className = sixthBonusAmt > 0
-                ? 'font-bold text-emerald-400 whitespace-nowrap'
-                : 'font-bold text-slate-400 whitespace-nowrap';
-            els.breakdownBonusSub.textContent = bonusSubText;
-            els.breakdownBonusSub.className = sixthBonusAmt > 0
-                ? 'text-xs text-emerald-400'
-                : 'text-xs text-slate-400';
-
-            els.breakdownSixthExtraAmt.textContent = formatINR(sixthExtraAmt);
-            els.breakdownSixthExtraSub.textContent = sixthExtraSubText;
-
-            els.breakdownRegAmt.textContent = formatINR(regularTotalAmt);
-            els.breakdownRegSub.textContent = `${regularEligibleExtraTx} extra tx × ₹${regularRate}`;
-
-            els.statSixthTotalTx.textContent = `${sixthTotalTx} tx`;
-            els.statEffectiveRate.textContent = `₹${regularRate} / tx`;
-            els.statEffectiveRate.className = globalRidersPass
-                ? 'text-base font-bold text-sky-400 mt-0.5 block'
-                : 'text-base font-bold text-amber-400 mt-0.5 block';
-        }
-
-        // Event Listeners
-        els.csatInput.addEventListener('input', (e) => {
-            state.csat = parseFloat(e.target.value) || 0;
-            calculateAndRender();
-        });
-
-        els.errorsInput.addEventListener('input', (e) => {
-            state.errors = Math.max(0, parseInt(e.target.value, 10) || 0);
-            calculateAndRender();
-        });
-
-        els.btnErrMinus.addEventListener('click', () => {
-            state.errors = Math.max(0, state.errors - 1);
-            els.errorsInput.value = state.errors;
-            calculateAndRender();
-        });
-
-        els.btnErrPlus.addEventListener('click', () => {
-            state.errors += 1;
-            els.errorsInput.value = state.errors;
-            calculateAndRender();
-        });
-
-        els.otDayBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                state.otDays = parseInt(btn.dataset.otdays, 10);
-                els.otDayBtns.forEach(b => {
-                    const active = parseInt(b.dataset.otdays, 10) === state.otDays;
-                    b.className = active
-                        ? 'ot-day-btn px-3.5 py-2 rounded-lg text-xs font-semibold transition bg-sky-600 text-white shadow'
-                        : 'ot-day-btn px-3.5 py-2 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white';
-                });
-                calculateAndRender();
-            });
-        });
-
-        els.otDay1Tx.addEventListener('input', (e) => {
-            state.day1Tx = Math.max(0, parseInt(e.target.value, 10) || 0);
-            calculateAndRender();
-        });
-
-        els.otDay2Tx.addEventListener('input', (e) => {
-            state.day2Tx = Math.max(0, parseInt(e.target.value, 10) || 0);
-            calculateAndRender();
-        });
-
-        els.modeDirectBtn.addEventListener('click', () => {
-            state.regularMode = 'direct';
-            els.modeDirectBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 text-white transition';
-            els.modeDailyBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition';
-            els.regularDirectContainer.classList.remove('hidden');
-            els.regularDailyContainer.classList.add('hidden');
-            calculateAndRender();
-        });
-
-        els.modeDailyBtn.addEventListener('click', () => {
-            state.regularMode = 'daily';
-            els.modeDailyBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 text-white transition';
-            els.modeDirectBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition';
-            els.regularDailyContainer.classList.remove('hidden');
-            els.regularDirectContainer.classList.add('hidden');
-            calculateAndRender();
-        });
-
-        els.regularDirectExtraInput.addEventListener('input', (e) => {
-            state.regularDirectExtra = Math.max(0, parseInt(e.target.value, 10) || 0);
-            calculateAndRender();
-        });
-
-        // Accordion Toggle
-        els.accordionToggle.addEventListener('click', () => {
-            const isHidden = els.accordionContent.classList.contains('hidden');
-            els.accordionContent.classList.toggle('hidden');
-            els.accordionChevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
-        });
-
-        // Toast Helper
-        let toastTimeout;
-        function showToast(msg) {
-            els.toastMsg.textContent = msg;
-            els.toast.classList.remove('translate-y-24', 'opacity-0');
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                els.toast.classList.add('translate-y-24', 'opacity-0');
-            }, 2800);
-        }
-
-        // Copy Summary to Clipboard (using textarea + execCommand for full iframe compatibility)
-        function copySummary() {
-            const summaryText = [
-                `📊 OVERTIME (OT) PAYOUT SUMMARY (16th Nov – 29th Nov)`,
-                `----------------------------------------`,
-                `• CSAT: ${state.csat}% | Unsaved Errors: ${state.errors}`,
-                `• 6th Day OT Days Worked: ${state.otDays} Day(s)` + (state.otDays > 0 ? ` (D1: ${state.day1Tx} tx` + (state.otDays === 2 ? `, D2: ${state.day2Tx} tx)` : `)`) : ``),
-                `• 6th Day Base OT: ${els.breakdownBaseAmt.textContent}`,
-                `• 6th Day Bonus: ${els.breakdownBonusAmt.textContent} (${els.breakdownBonusSub.textContent})`,
-                `• 6th Day Extra Tx Payout: ${els.breakdownSixthExtraAmt.textContent}`,
-                `• Regular Day OT (>45/day): ${els.breakdownRegAmt.textContent} (${els.breakdownRegSub.textContent})`,
-                `----------------------------------------`,
-                `💰 GRAND TOTAL OT PAYOUT: ${els.grandTotalDisplay.textContent}`
-            ].join('\n');
-
-            const textArea = document.createElement('textarea');
-            textArea.value = summaryText;
-            textArea.style.position = 'fixed';
-            textArea.style.left = '-9999px';
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                showToast('Payout summary copied to clipboard!');
-            } catch (err) {
-                showToast('Unable to copy summary.');
-            }
-            document.body.removeChild(textArea);
-        }
-
-        els.btnCopyTop.addEventListener('click', copySummary);
-        els.btnCopyMain.addEventListener('click', copySummary);
-
-        // Reset Handler
-        els.btnReset.addEventListener('click', () => {
-            state.csat = 65;
-            state.errors = 0;
-            state.otDays = 0;
-            state.day1Tx = 35;
-            state.day2Tx = 35;
-            state.regularMode = 'direct';
-            state.regularDirectExtra = 0;
-            state.regularDailyTx = [45, 45, 45, 45, 45, 45, 45, 45, 45, 45];
-
-            els.csatInput.value = state.csat;
-            els.errorsInput.value = state.errors;
-            els.otDay1Tx.value = state.day1Tx;
-            els.otDay2Tx.value = state.day2Tx;
-            els.regularDirectExtraInput.value = state.regularDirectExtra;
-
-            els.otDayBtns.forEach(b => {
-                const active = parseInt(b.dataset.otdays, 10) === 0;
-                b.className = active
-                    ? 'ot-day-btn px-3.5 py-2 rounded-lg text-xs font-semibold transition bg-sky-600 text-white shadow'
-                    : 'ot-day-btn px-3.5 py-2 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white';
-            });
-
-            els.modeDirectBtn.click();
-            buildRegularDailyInputs();
-            calculateAndRender();
-            showToast('Calculator values reset to baseline.');
-        });
-
-        // Boot Application
-        buildRegularDailyInputs();
-        calculateAndRender();
-    </script>
-</body>
-</html>
-```
